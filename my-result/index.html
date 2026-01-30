@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JEE Main Result (Demo)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root{
+  --blue:#0b3c6f;--dark:#08325c;--green:#2e8b57;--border:#d9d9d9;
+}
+body{margin:0;background:#f5f7fb;font-family:Arial}
+.topbar{
+  background:linear-gradient(180deg,var(--blue),var(--dark));
+  color:#fff;text-align:center;padding:10px;font-size:14px
+}
+.wrap{display:flex;justify-content:center;padding:28px}
+.card{background:#fff;max-width:520px;width:100%;box-shadow:0 6px 18px rgba(0,0,0,.1)}
+.card-head{background:#123d6b;color:#fff;padding:10px;font-weight:700}
+.card-body{padding:18px}
+.row{display:grid;grid-template-columns:180px 1fr;gap:10px;margin-bottom:12px}
+input{height:36px;border:1px solid var(--border);padding:0 10px}
+.btn{
+  background:var(--green);color:#fff;border:none;
+  padding:10px 18px;font-weight:700;cursor:pointer;margin:6px 4px
+}
+.captcha{background:#0c3c6f;color:#fff;padding:8px 14px;letter-spacing:2px}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <b>JOINT ENTRANCE EXAMINATION (Main) – 2026</b><br>
+  SESSION 1 (JANUARY) • NTA SCORE CARD
+</div>
+
+<div class="wrap">
+<div class="card">
+<div class="card-head">🔒 View Result</div>
+
+<div class="card-body" id="loginBox">
+  <div class="row"><label>Application No:</label><input id="app"></div>
+  <div class="row"><label>Password:</label><input id="pass" type="password"></div>
+  <div class="row"><label>CAPTCHA:</label><input id="captchaInput"></div>
+  <div class="row"><label></label><div id="captcha" class="captcha">ABCDE</div></div>
+  <button class="btn" onclick="login()">LOGIN</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+// autofill
+document.getElementById("app").value="260310087055";
+document.getElementById("pass").value="@Tnayare05";
+
+function genCaptcha(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];
+  captcha.innerText=s;
+}
+genCaptcha();
+
+// demo db
+const db={
+ "260310087055":{
+  password:"@Tnayare05",
+  name:"Tushar Nayare",
+  percentile:98.76,
+  phy:96,chem:99,maths:97
+ }
+};
+
+let currentResult=null;
+
+function login(){
+  if(captchaInput.value!==captcha.innerText){
+    alert("CAPTCHA incorrect");genCaptcha();return;
+  }
+  const r=db[app.value];
+  if(!r||r.password!==pass.value){
+    alert("Invalid Login");return;
+  }
+  currentResult=r;
+  document.getElementById("loginBox").innerHTML=`
+    <h3>Result (Demo)</h3>
+    <p><b>Name:</b> ${r.name}</p>
+    <p><b>Application No:</b> ${app.value}</p>
+    <p><b>Overall Percentile:</b> ${r.percentile}</p>
+    <table border="1" cellpadding="6" width="100%">
+      <tr><th>Physics</th><th>Chemistry</th><th>Maths</th></tr>
+      <tr align="center"><td>${r.phy}</td><td>${r.chem}</td><td>${r.maths}</td></tr>
+    </table>
+    <br>
+    <button class="btn" onclick="downloadPDF()">Download Scorecard (PDF)</button>
+  `;
+}
+
+function downloadPDF(){
+  const r=currentResult;
+  const doc=new jsPDF();
+
+  doc.setFontSize(14);
+  doc.text("JOINT ENTRANCE EXAMINATION (Main) – 2026",105,20,{align:"center"});
+  doc.setFontSize(11);
+  doc.text("NTA SCORE CARD (DEMO)",105,28,{align:"center"});
+
+  doc.line(20,32,190,32);
+
+  doc.text(`Name: ${r.name}`,20,45);
+  doc.text(`Application No: 260310087055`,20,55);
+  doc.text(`Overall Percentile: ${r.percentile}`,20,65);
+
+  doc.text("Subject-wise Percentile:",20,80);
+  doc.text(`Physics: ${r.phy}`,30,90);
+  doc.text(`Chemistry: ${r.chem}`,30,100);
+  doc.text(`Mathematics: ${r.maths}`,30,110);
+
+  doc.text("This is a computer generated scorecard (Demo).",20,135);
+
+  doc.save("JEE_Main_2026_Scorecard.pdf");
+}
+</script>
+
+</body>
+</html>
+
